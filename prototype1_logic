@@ -1,0 +1,52 @@
+PharmaShield Cybersecurity & Automation Framework
+
+4. Algorithmic Framework (Expanded)
+4.1 Threat Detection Algorithm (Python): This algorithm uses isolation forest to detect anomalies from sensor
+data and logs them.
+
+from sklearn.preprocessing import StandardScaler
+import matplotlib.pyplot as plt
+
+def detect_anomaly(data: pd.DataFrame):
+    scaler = StandardScaler()
+    scaled_data = scaler.fit_transform(data)
+    model = IsolationForest(n_estimators=100, contamination=0.01, random_state=42)
+    model.fit(scaled_data)
+    data['anomaly'] = model.predict(scaled_data)
+    anomalies = data[data['anomaly'] == -1]
+    anomalies.to_csv("anomalies_log.csv") # Save for audit trail
+    return anomalies
+
+4.2 Real-Time Monitoring Logic (Node-RED): A function node checks threat score and routes messages
+accordingly.
+
+// Node-RED Function Node Example
+var threatScore = msg.payload.threat_score;
+
+if (threatScore > 75) {
+  node.status({fill:"red", shape:"dot", text:"Threat Detected"});
+  msg.payload = {
+    level: "HIGH",
+    action: "LOCKDOWN",
+    timestamp: Date.now()
+};
+return [msg, null]; // Send to Lockdown output
+} else {
+return [null, msg]; // Safe output
+}
+
+5. Automation Integration (Expanded)
+
+PharmaShield Cybersecurity & Automation Framework
+This function sends lockdown commands to automated systems in case of critical threats.
+
+import requests
+def trigger_lockdown(endpoint: str, auth_token: str):
+
+  headers = {"Authorization": f"Bearer {auth_token}"}
+  payload = {"command": "LOCKDOWN", "origin": "PharmaShield"}
+  response = requests.post(endpoint, json=payload, headers=headers)
+  if response.status_code == 200:
+  print("Lockdown executed successfully.")
+else:
+print(f"Error: {response.status_code}")
